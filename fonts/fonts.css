@@ -1,0 +1,5 @@
+@font-face{font-family:'Anton';font-style:normal;font-weight:400;font-display:swap;src:url('anton-400.woff2') format('woff2');}
+@font-face{font-family:'Archivo';font-style:normal;font-weight:500 900;font-display:swap;src:url('archivo-normal.woff2') format('woff2');}
+@font-face{font-family:'Archivo';font-style:italic;font-weight:500 900;font-display:swap;src:url('archivo-italic.woff2') format('woff2');}
+@font-face{font-family:'Inter';font-style:normal;font-weight:400 700;font-display:swap;src:url('inter-normal.woff2') format('woff2');}
+@font-face{font-family:'JetBrains Mono';font-style:normal;font-weight:500 700;font-display:swap;src:url('jbmono-normal.woff2') format('woff2');}

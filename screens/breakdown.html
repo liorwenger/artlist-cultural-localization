@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Breakdown – Keep or Localize</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  :root{
+    --pink:#F893C6; --indigo:#440DEF; --ink:#13102e;
+    --grey:#ececf1; --cream:#fff8fb; --yellow:#fff24d; --lightblue:#9FD8FF;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --display:'Archivo',var(--sans);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--pink);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;text-decoration:none;}
+
+  .bg{
+    min-height:100vh;
+    background-image:repeating-linear-gradient(0deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px),
+                      repeating-linear-gradient(90deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px);
+  }
+
+  .topbar{display:flex;align-items:center;padding:26px 48px;}
+  .brand{font-family:var(--display);font-weight:900;font-size:24px;}
+
+  .wrap{max-width:1760px;margin:0 auto;padding:12px 48px 170px;}
+  @media (max-width:640px){ .wrap{padding:8px 18px 170px;} }
+
+  .layout{display:grid;grid-template-columns:minmax(230px,22%) 1fr;gap:32px;align-items:start;}
+  @media (max-width:980px){ .layout{grid-template-columns:1fr;} }
+
+  /* left column: step sidebar + master video card, stacked */
+  .leftcol{display:flex;flex-direction:column;gap:20px;}
+
+  .steps-card{background:var(--grey);border:3px solid var(--ink);border-radius:22px;padding:24px 20px;box-shadow:6px 6px 0 var(--ink);}
+  .steps-list{position:relative;display:flex;flex-direction:column;gap:18px;padding-left:2px;}
+  .steps-list::before{content:'';position:absolute;left:13px;top:13px;bottom:13px;width:2px;background:var(--ink);opacity:.2;}
+  .step-row{position:relative;display:flex;align-items:center;gap:11px;}
+  .step-dot{width:27px;height:27px;border-radius:50%;background:#fff;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;z-index:1;color:var(--ink);}
+  .step-row.done .step-dot{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .step-row.active .step-dot{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .step-label{font-family:var(--display);font-weight:800;font-size:13px;color:#9c97b8;text-transform:uppercase;letter-spacing:.01em;}
+  .step-row.done .step-label{color:var(--ink);opacity:.72;}
+  .step-row.active .step-label{background:transparent;border:2.5px solid var(--ink);border-radius:9px;padding:6px 11px;color:var(--ink);display:inline-block;}
+
+  /* master video reference card, now interactive: hovering an element below highlights it here */
+  .mastercard{background:var(--grey);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:6px 6px 0 var(--ink);}
+  .mastercard .eyebrow{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#6b6686;margin-bottom:10px;}
+  .vframe{position:relative;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--ink);cursor:pointer;
+    background-image:linear-gradient(0deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 45%), url('../icons-artlist/photo-1787613543838-33ae4d7c4147.avif');
+    background-size:cover;
+    background-position:right center;
+  }
+  .vframe .playbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;z-index:2;}
+  .vframe .mtag{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:9.5px;color:#fff;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:5px;letter-spacing:.04em;z-index:2;}
+  .vframe .dur{position:absolute;bottom:8px;right:8px;font-family:var(--mono);font-size:9.5px;color:#fff;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:5px;z-index:2;}
+  .mastercard .mtitle{font-family:var(--display);font-weight:800;font-size:14px;margin:12px 0 2px;}
+  .mastercard .msub{font-size:11.5px;color:#6b6686;line-height:1.4;}
+
+  /* right: one merged box */
+  .rightcol{min-width:0;}
+
+  .bluebox{background:var(--indigo);border:3px solid var(--ink);border-radius:32px;padding:38px 44px;box-shadow:8px 8px 0 var(--ink);color:#fff;}
+  @media (max-width:640px){ .bluebox{padding:26px 22px;} }
+  .chipbox-title{font-family:var(--display);margin:0 0 16px;line-height:1;white-space:nowrap;}
+  .chipbox-title span{font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;word-spacing:0.22em;font-size:clamp(15px,4.6vw,56px);}
+  .chipbox-title .t1{color:#fff;margin-right:0.22em;}
+  .chipbox-title .t2{color:var(--pink);font-style:italic;}
+  .subnote{font-size:15px;color:#e4defc;max-width:640px;line-height:1.55;margin:0 0 24px;}
+  .step-kicker{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#c9b8f5;opacity:.5;margin-bottom:10px;}
+
+  .legend{display:flex;gap:22px;flex-wrap:wrap;font-size:12.5px;color:#c9b8f5;margin-bottom:8px;}
+  .legend .sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:7px;vertical-align:middle;border:1.5px solid var(--ink);}
+  .sw.keep{background:var(--lightblue);}
+  .sw.localize{background:var(--pink);}
+
+  .divider{border:none;border-top:2px solid rgba(255,255,255,.22);margin:24px 0 8px;}
+
+  .elist{display:flex;flex-direction:column;}
+  .elrow{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;padding:22px 0;border-bottom:1px solid rgba(255,255,255,.14);}
+  .elrow:last-child{border-bottom:none;}
+  .el-head{display:flex;align-items:flex-start;gap:14px;min-width:0;flex:1;}
+  .el-icon{width:34px;height:34px;display:flex;align-items:center;justify-content:center;flex-shrink:0;color:#c9b8f5;}
+  .el-icon svg{width:32px;height:32px;}
+  .el-main{min-width:0;flex:1;}
+  .el-name{font-family:var(--display);font-weight:800;font-size:18px;margin-bottom:4px;}
+  .el-desc{font-family:var(--mono);font-size:11.5px;color:#c9b8f5;margin-bottom:9px;}
+  .el-why{font-size:14px;color:#e4defc;line-height:1.55;max-width:500px;}
+
+  .segtoggle{display:flex;border:2.5px solid var(--ink);border-radius:999px;overflow:hidden;flex-shrink:0;background:#fff;}
+  .segbtn{font-family:var(--display);font-weight:800;font-size:13px;padding:10px 18px;background:#fff;color:var(--ink);border:none;}
+  .segbtn + .segbtn{border-left:2.5px solid var(--ink);}
+  .segbtn.keep.on{background:var(--lightblue);}
+  .segbtn.localize.on{background:var(--pink);color:var(--ink);}
+  @media (max-width:640px){ .elrow{flex-direction:column;gap:14px;} }
+
+  .footer{position:fixed;left:0;right:0;bottom:0;background:var(--cream);border-top:3px solid var(--ink);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10;}
+  .footer .note{font-family:var(--mono);font-size:13.5px;}
+  .cta{font-family:var(--display);font-weight:800;font-size:16px;background:var(--yellow);border:3px solid var(--ink);border-radius:999px;padding:15px 26px;box-shadow:4px 4px 0 var(--ink);}
+  .cta:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink);}
+  .back{font-family:var(--display);font-weight:700;font-size:15px;background:transparent;border:2px solid transparent;padding:10px 12px;}
+  .back:hover{text-decoration:underline;}
+  @media (max-width:640px){ .topbar{padding:18px 20px;} .footer{padding:16px 20px;} .footer .note{display:none;} }
+
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-family:var(--mono);opacity:0;transition:all .2s;pointer-events:none;z-index:20;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="topbar">
+    <div class="brand">Artlist</div>
+  </div>
+
+  <div class="wrap">
+    <div class="layout">
+      <div class="leftcol">
+        <div class="steps-card">
+          <div class="steps-list" id="stepsList">
+            <div class="step-row done"><span class="step-dot">✓</span><span class="step-label">01 Source</span></div>
+            <div class="step-row active"><span class="step-dot">2</span><span class="step-label">02 Breakdown</span></div>
+            <div class="step-row"><span class="step-dot">3</span><span class="step-label">03 Markets</span></div>
+            <div class="step-row"><span class="step-dot">4</span><span class="step-label">04 Suggestions</span></div>
+            <div class="step-row"><span class="step-dot">5</span><span class="step-label">05 Results</span></div>
+          </div>
+        </div>
+
+        <div class="mastercard">
+          <div class="eyebrow">Master cut</div>
+          <div class="vframe" id="vframe">
+            <span class="mtag">MASTER</span>
+            <span class="dur">0:30</span>
+            <span class="playbtn">▶</span>
+          </div>
+          <div class="mtitle">Stride – "Every Morning"</div>
+          <div class="msub">The source cut every element below is tagged from.</div>
+        </div>
+      </div>
+
+      <div class="rightcol">
+        <div class="bluebox">
+          <div class="step-kicker">Step 02 · Breakdown</div>
+          <div class="chipbox-title"><span class="t1">Keep or</span> <span class="t2">localize</span></div>
+          <p class="subnote">The AI scanned the master cut for brand assets, spoken language, music licensing and visible text. Flip anything it got wrong – the call applies to every market next.</p>
+          <div class="legend">
+            <span><span class="sw keep"></span>Keep – identical in every market</span>
+            <span><span class="sw localize"></span>Localize – rebuilt per market</span>
+          </div>
+          <hr class="divider">
+          <div class="elist" id="elist"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="back" id="backBtn">← Source</button>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="note" id="note">Applies to every market in this flow</span>
+      <button class="cta" id="continueBtn">Continue to Markets →</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const icons = {
+  product: '<path d="M12 3 4 7v10l8 4 8-4V7z"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/>',
+  message: '<path d="M4 5h16v11H9l-5 4v-4H4z"/>',
+  actor: '<circle cx="12" cy="8" r="3.4"/><path d="M5 20c0-4 3-6.5 7-6.5s7 2.5 7 6.5"/>',
+  voice: '<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="M8.5 21h7"/>',
+  music: '<circle cx="7" cy="18" r="2.6"/><circle cx="17" cy="16" r="2.6"/><path d="M9.6 18V5.5L19.6 4v11.5"/>',
+  text: '<path d="M5 6h14"/><path d="M5 12h14"/><path d="M5 18h8"/>',
+  humor: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 10.2h.01"/><path d="M15.5 10.2h.01"/><path d="M8 14.5c1.2 1.4 2.6 2.1 4 2.1s2.8-.7 4-2.1"/>',
+};
+
+const elements = [
+  {id:'product', name:'Product shot', desc:'Stride Air 2 – hero rotation, 0:24–0:28', why:'Brand asset. Packaging and colorway are identical in every market.', state:'keep'},
+  {id:'message', name:'Core message', desc:"\"Start before you're ready.\" – VO + end card", why:'The campaign idea. Meaning must hold everywhere; wording can be translated, never rewritten.', state:'keep'},
+  {id:'actor', name:'Casting', desc:'Lead runner, woman, late 20s – 14 shots', why:'Casting carries cultural cues: age, styling, setting. A swap keeps blocking and wardrobe intact.', state:'localize'},
+  {id:'voice', name:'Voice-over', desc:'Female VO, en-US, energetic, imperative read', why:'Language, register and read speed all shift by market.', state:'localize'},
+  {id:'music', name:'Music', desc:'Hip-hop bed, 112 BPM, licensed globally', why:'Genre signals who the ad is for. Regional equivalents exist in the catalog at a matching tempo.', state:'localize'},
+  {id:'text', name:'On-screen text', desc:'Storefront "SALE 30% OFF", 3 lower-thirds', why:'Latin text and price formats read as foreign outside English-reading markets.', state:'localize'},
+  {id:'humor', name:'Humor & pacing', desc:'Deadpan joke beat at 0:18, quick-cut rhythm', why:'Comedic timing lands differently by culture – some markets want it broader, some want it cut.', state:'localize'},
+];
+
+function renderList(){
+  document.getElementById('elist').innerHTML = elements.map(el => `
+    <div class="elrow" data-for="${el.id}">
+      <div class="el-head">
+        <div class="el-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${icons[el.id]}</svg></div>
+        <div class="el-main">
+          <div class="el-name">${el.name}</div>
+          <div class="el-desc">${el.desc}</div>
+          <div class="el-why">${el.why}</div>
+        </div>
+      </div>
+      <div class="segtoggle">
+        <button class="segbtn keep ${el.state==='keep'?'on':''}" data-id="${el.id}" data-set="keep">Keep</button>
+        <button class="segbtn localize ${el.state==='localize'?'on':''}" data-id="${el.id}" data-set="localize">Localize</button>
+      </div>
+    </div>
+  `).join('');
+
+  document.querySelectorAll('.segbtn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const el = elements.find(e=>e.id===btn.dataset.id);
+      el.state = btn.dataset.set;
+      renderList();
+      showToast(`${el.name} set to ${el.state === 'keep' ? 'Keep' : 'Localize'}`);
+    });
+  });
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__t);
+  window.__t = setTimeout(()=> t.classList.remove('show'), 1600);
+}
+
+document.getElementById('continueBtn').addEventListener('click', ()=>{
+  showToast('Breakdown saved – opening Markets.');
+});
+document.getElementById('backBtn').addEventListener('click', ()=> showToast('Would return to Source – out of scope for this screen.'));
+document.getElementById('vframe').addEventListener('click', ()=> showToast('Would play the master cut – out of scope for this screen.'));
+
+renderList();
+</script>
+</body>
+</html>

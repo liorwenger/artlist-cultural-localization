@@ -1,0 +1,317 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Suggestions – Confirm by Market</title>
+<link rel="stylesheet" href="../fonts/fonts.css">
+<style>
+  :root{
+    --pink:#F893C6; --indigo:#440DEF; --ink:#13102e;
+    --grey:#ececf1; --cream:#fff8fb; --yellow:#fff24d; --lightblue:#9FD8FF;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --display:'Archivo',var(--sans);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--pink);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  button{font-family:inherit;cursor:pointer;}
+  a{color:inherit;text-decoration:none;}
+
+  .bg{
+    min-height:100vh;
+    background-image:repeating-linear-gradient(0deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px),
+                      repeating-linear-gradient(90deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px);
+  }
+
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:26px 48px;}
+  .brand{font-family:var(--display);font-weight:900;font-size:24px;}
+  .getmore{font-family:var(--display);font-weight:800;font-size:13px;background:var(--yellow);border:2.5px solid var(--ink);border-radius:999px;padding:9px 16px;}
+
+  .wrap{max-width:1760px;margin:0 auto;padding:12px 48px 170px;}
+  @media (max-width:640px){ .wrap{padding:8px 18px 170px;} }
+
+  .layout{display:grid;grid-template-columns:minmax(230px,22%) 1fr;gap:32px;align-items:start;}
+  @media (max-width:980px){ .layout{grid-template-columns:1fr;} }
+
+  /* left column: step sidebar + master video card, stacked */
+  .leftcol{display:flex;flex-direction:column;gap:20px;}
+
+  .steps-card{background:var(--grey);border:3px solid var(--ink);border-radius:22px;padding:24px 20px;box-shadow:6px 6px 0 var(--ink);}
+  .steps-list{position:relative;display:flex;flex-direction:column;gap:18px;padding-left:2px;}
+  .steps-list::before{content:'';position:absolute;left:13px;top:13px;bottom:13px;width:2px;background:var(--ink);opacity:.2;}
+  .step-row{position:relative;display:flex;align-items:center;gap:11px;}
+  .step-dot{width:27px;height:27px;border-radius:50%;background:#fff;border:2px solid var(--ink);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;z-index:1;color:var(--ink);}
+  .step-row.done .step-dot{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .step-row.active .step-dot{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .step-label{font-family:var(--display);font-weight:800;font-size:13px;color:#9c97b8;text-transform:uppercase;letter-spacing:.01em;}
+  .step-row.done .step-label{color:var(--ink);opacity:.72;}
+  .step-row.active .step-label{background:transparent;border:2.5px solid var(--ink);border-radius:9px;padding:6px 11px;color:var(--ink);display:inline-block;}
+
+  /* master video reference card */
+  .mastercard{background:var(--grey);border:3px solid var(--ink);border-radius:22px;padding:18px;box-shadow:6px 6px 0 var(--ink);}
+  .mastercard .eyebrow{font-family:var(--mono);font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#6b6686;margin-bottom:10px;}
+  .vframe{position:relative;aspect-ratio:16/10;border-radius:14px;overflow:hidden;border:2px solid var(--ink);cursor:pointer;
+    background-image:linear-gradient(0deg, rgba(0,0,0,.4) 0%, rgba(0,0,0,0) 45%), url('../icons-artlist/photo-1787613543838-33ae4d7c4147.avif');
+    background-size:cover;
+    background-position:right center;
+  }
+  .vframe .playbtn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:42px;height:42px;border-radius:50%;background:rgba(255,255,255,.16);border:2px solid rgba(255,255,255,.55);display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;z-index:1;}
+  .vframe .mtag{position:absolute;top:8px;left:8px;font-family:var(--mono);font-size:9.5px;color:#fff;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:5px;letter-spacing:.04em;z-index:1;}
+  .vframe .dur{position:absolute;bottom:8px;right:8px;font-family:var(--mono);font-size:9.5px;color:#fff;background:rgba(0,0,0,.5);padding:3px 7px;border-radius:5px;z-index:1;}
+  .mastercard .mtitle{font-family:var(--display);font-weight:800;font-size:14px;margin:12px 0 2px;}
+  .mastercard .msub{font-size:11.5px;color:#6b6686;line-height:1.4;}
+
+  /* right: one merged box */
+  .rightcol{min-width:0;}
+
+  .bluebox{background:var(--indigo);border:3px solid var(--ink);border-radius:32px;padding:38px 44px;box-shadow:8px 8px 0 var(--ink);color:#fff;}
+  @media (max-width:640px){ .bluebox{padding:26px 22px;} }
+  .step-kicker{font-family:var(--mono);font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#c9b8f5;opacity:.5;margin-bottom:10px;}
+  .chipbox-title{font-family:var(--display);margin:0 0 32px;line-height:1;white-space:nowrap;}
+  .chipbox-title span{font-weight:900;text-transform:uppercase;letter-spacing:-0.01em;font-size:clamp(15px,4.6vw,56px);}
+  .chipbox-title .t1{color:#fff;}
+  .chipbox-title .t2{color:var(--pink);font-style:italic;}
+  .chiprow{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  .chip{font-family:var(--display);font-weight:800;font-size:17px;background:#fff;color:var(--ink);border:3px solid var(--ink);border-radius:999px;padding:13px 22px 13px 16px;display:inline-flex;align-items:center;gap:9px;}
+  .chip .cflag{font-size:21px;}
+  .chip .ctick{color:var(--indigo);}
+  .chip.active{background:var(--lightblue);box-shadow:3px 3px 0 var(--ink);}
+  .chip.confirmed:not(.active){background:#efeaff;}
+
+  .divider{border:none;border-top:2px solid rgba(255,255,255,.22);margin:36px 0 32px;}
+
+  .preview{position:relative;}
+  .empty{padding:30px 4px;text-align:center;color:#c9b8f5;font-size:14px;}
+  .preview-head{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:6px;}
+  .preview-head h2{font-family:var(--display);font-weight:800;font-size:28px;margin:0;letter-spacing:-0.01em;}
+  .preview-head h2 .cname{color:var(--pink);font-style:italic;}
+  .preview-badge{font-family:var(--mono);font-size:12.5px;background:transparent;border:2px solid #fff;color:#fff;border-radius:999px;padding:5px 13px;}
+  .preview-note{font-size:15px;color:#e4defc;margin:10px 0 26px;max-width:640px;line-height:1.55;}
+  .ptable{width:100%;border-collapse:collapse;font-size:15px;}
+  .ptable th{text-align:left;font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#c9b8f5;padding:9px 8px;border-bottom:1px solid rgba(255,255,255,.22);font-weight:500;}
+  .ptable td{padding:15px 8px;border-bottom:1px solid rgba(255,255,255,.14);vertical-align:top;color:#e4defc;}
+  .ptable td.loc{color:#fff;font-weight:500;}
+  .loc-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--lightblue);margin-right:9px;}
+  .kept-badge{font-family:var(--mono);font-size:11.5px;color:#c9b8f5;border:1.5px solid rgba(255,255,255,.35);padding:4px 10px;border-radius:999px;letter-spacing:.02em;}
+  .ptable td.sw{width:1%;white-space:nowrap;text-align:right;}
+  .rowswitch{width:44px;height:25px;border-radius:999px;border:2.5px solid var(--ink);background:rgba(255,255,255,.2);position:relative;padding:0;flex-shrink:0;display:inline-block;}
+  .rowswitch .knob{position:absolute;top:2px;left:2px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s, background .15s;}
+  .rowswitch.on{background:var(--yellow);border-color:var(--ink);}
+  .rowswitch.on .knob{left:calc(100% - 19px);background:var(--ink);}
+
+  .footer{position:fixed;left:0;right:0;bottom:0;background:var(--cream);border-top:3px solid var(--ink);padding:20px 48px;display:flex;align-items:center;justify-content:space-between;gap:12px;z-index:10;}
+  .footer .note{font-family:var(--mono);font-size:13.5px;}
+  .cta{font-family:var(--display);font-weight:800;font-size:16px;background:var(--yellow);border:3px solid var(--ink);border-radius:999px;padding:15px 26px;box-shadow:4px 4px 0 var(--ink);}
+  .cta:hover{transform:translate(-1px,-1px);box-shadow:5px 5px 0 var(--ink);}
+  .cta:disabled{opacity:.4;box-shadow:none;cursor:not-allowed;transform:none;}
+  .back{font-family:var(--display);font-weight:700;font-size:15px;background:transparent;border:2px solid transparent;padding:10px 12px;}
+  .back:hover{text-decoration:underline;}
+  @media (max-width:640px){ .topbar{padding:18px 20px;} .footer{padding:16px 20px;} .footer .note{display:none;} }
+
+  .toast{position:fixed;bottom:100px;left:50%;transform:translateX(-50%) translateY(10px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-size:13.5px;font-family:var(--mono);opacity:0;transition:all .2s;pointer-events:none;z-index:20;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div class="bg">
+  <div class="topbar">
+    <div class="brand">Artlist</div>
+    <div class="credits">
+      <button class="getmore">Get More Credits</button>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <div class="layout">
+      <div class="leftcol">
+        <div class="steps-card">
+          <div class="steps-list" id="stepsList">
+            <div class="step-row done"><span class="step-dot">✓</span><span class="step-label">01 Source</span></div>
+            <div class="step-row done"><span class="step-dot">✓</span><span class="step-label">02 Breakdown</span></div>
+            <div class="step-row done"><span class="step-dot">✓</span><span class="step-label">03 Markets</span></div>
+            <div class="step-row active"><span class="step-dot">4</span><span class="step-label">04 Suggestions</span></div>
+            <div class="step-row"><span class="step-dot">5</span><span class="step-label">05 Results</span></div>
+          </div>
+        </div>
+
+        <div class="mastercard">
+          <div class="eyebrow">Master cut</div>
+          <div class="vframe" id="vframe">
+            <span class="mtag">MASTER</span>
+            <span class="dur">0:30</span>
+            <span class="playbtn">▶</span>
+          </div>
+          <div class="mtitle">Stride – "Every Morning"</div>
+          <div class="msub">The source cut every market below builds from.</div>
+        </div>
+      </div>
+
+      <div class="rightcol">
+        <div class="bluebox">
+          <div class="step-kicker">Step 04 · Suggestions</div>
+          <div class="chipbox-title"><span class="t1">Confirm by</span> <span class="t2">market</span></div>
+          <div class="chiprow" id="chiprow"></div>
+          <hr class="divider">
+          <div class="preview" id="preview"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <button class="back" id="backBtn">← Markets</button>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="note" id="note"></span>
+      <button class="cta" id="continueBtn"></button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const markets = [
+  {id:'japan', flag:'🇯🇵', name:'Japan', confirmed:false,
+    rows:[{el:'Casting', master:'Woman, late 20s', loc:'Man, early 30s, understated styling', accepted:true},
+          {el:'Voice-over', master:'Female, energetic', loc:'Male, polite-formal register', accepted:true},
+          {el:'Music', master:'Hip-hop, 112 BPM', loc:'City-pop downtempo, 96 BPM', accepted:true},
+          {el:'On-screen text', master:'Latin, "SALE 30%"', loc:'Kanji vertical, ¥ pricing', accepted:true},
+          {el:'Humor & pacing', master:'Deadpan joke at 0:18', loc:'Dropped – quiet focus beat', accepted:true}]},
+  {id:'brazil', flag:'🇧🇷', name:'Brazil', confirmed:false,
+    rows:[{el:'Casting', master:'Woman, late 20s', loc:'Same brief, runners added to background', accepted:true},
+          {el:'Voice-over', master:'Female, energetic', loc:'Portuguese, higher energy, faster pace', accepted:true},
+          {el:'Music', master:'Hip-hop, 112 BPM', loc:'Funk carioca hybrid, 118 BPM', accepted:true},
+          {el:'On-screen text', master:'Latin, "SALE 30%"', loc:'R$ pricing, "SÓ HOJE!"', accepted:true},
+          {el:'Humor & pacing', master:'Deadpan joke at 0:18', loc:'Amplified, crowd reaction added', accepted:true}]},
+  {id:'southkorea', flag:'🇰🇷', name:'South Korea', confirmed:false,
+    rows:[{el:'Casting', master:'Woman, late 20s', loc:'Early 20s, streetwear styling', accepted:true},
+          {el:'Voice-over', master:'Female, energetic', loc:'Bright idol-pop cadence, faster read', accepted:true},
+          {el:'Music', master:'Hip-hop, 112 BPM', loc:'K-pop-adjacent synth, 130 BPM', accepted:true},
+          {el:'On-screen text', master:'Latin, "SALE 30%"', loc:'₩ pricing + QR code', accepted:true},
+          {el:'Humor & pacing', master:'Deadpan joke at 0:18', loc:'Meme-reference beat added', accepted:true}]},
+  {id:'india', flag:'🇮🇳', name:'India', confirmed:false,
+    rows:[{el:'Casting', master:'Woman, late 20s', loc:'Local runner, festival street setting', accepted:true},
+          {el:'Voice-over', master:'Female, energetic', loc:'Hindi/English code-mixed, high energy', accepted:true},
+          {el:'Music', master:'Hip-hop, 112 BPM', loc:'Bollywood-adjacent fusion, 120 BPM', accepted:true},
+          {el:'On-screen text', master:'Latin, "SALE 30%"', loc:'₹ pricing, festival-sale framing', accepted:true},
+          {el:'Humor & pacing', master:'Deadpan joke at 0:18', loc:'Amplified – exaggerated reaction shot', accepted:true}]},
+  {id:'germany', flag:'🇩🇪', name:'Germany', confirmed:false,
+    rows:[{el:'Casting', master:'Woman, late 20s', loc:'Same brief, no change', accepted:true},
+          {el:'Voice-over', master:'Female, energetic', loc:'German, direct, low-hype register', accepted:true},
+          {el:'Music', master:'Hip-hop, 112 BPM', loc:'Minimal techno, 124 BPM', accepted:true},
+          {el:'On-screen text', master:'Latin, "SALE 30%"', loc:'€ pricing, spec callout', accepted:true},
+          {el:'Humor & pacing', master:'Deadpan joke at 0:18', loc:'Cut – understatement instead', accepted:true}]},
+];
+let currentId = 'japan';
+const creditsPerMarket = 2500;
+
+function marketCredits(m){
+  return creditsPerMarket;
+}
+
+function nextPendingAfter(id){
+  const idx = markets.findIndex(m=>m.id===id);
+  for(let i=1;i<=markets.length;i++){
+    const m = markets[(idx+i)%markets.length];
+    if(!m.confirmed) return m;
+  }
+  return null;
+}
+
+function renderChips(){
+  document.getElementById('chiprow').innerHTML = markets.map(m=>`
+    <button class="chip ${m.confirmed?'confirmed':''} ${m.id===currentId?'active':''}" data-id="${m.id}">
+      ${m.confirmed ? '<span class="ctick">✓</span> ' : ''}<span class="cflag">${m.flag}</span>${m.name}
+    </button>
+  `).join('');
+  document.querySelectorAll('.chip').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      currentId = b.dataset.id;
+      renderChips(); renderPreview(); renderFooter();
+    });
+  });
+}
+
+function renderPreview(){
+  const prev = document.getElementById('preview');
+  const m = markets.find(x=>x.id===currentId);
+  const loc = m.rows.filter(r=>r.accepted).length;
+  const kept = m.rows.length - loc;
+  prev.innerHTML = `
+    <div class="preview-head"><h2>${m.flag} <span class="cname">${m.name}</span> – Suggested changes</h2><span style="display:flex;gap:8px;flex-wrap:wrap;"><span class="preview-badge">${loc} localized · ${kept} kept</span><span class="preview-badge">${marketCredits(m)} credits</span></span></div>
+    <p class="preview-note">AI-generated options for every element flagged for localization. Pull any row back to the master version if it isn't right – it won't block confirming the rest of this market.</p>
+    <table class="ptable">
+      <tr><th>Element</th><th>Master</th><th>Localized</th><th></th></tr>
+      ${m.rows.map((r,i)=>`
+        <tr>
+          <td>${r.el}</td>
+          <td>${r.master}</td>
+          <td class="loc">${r.accepted ? `<span class="loc-dot"></span>${r.loc}` : `<span class="kept-badge">Kept as master</span>`}</td>
+          <td class="sw"><button class="rowswitch ${r.accepted?'on':''}" data-i="${i}" title="${r.accepted ? 'Localized – click to keep master instead' : 'Kept as master – click to use the AI suggestion'}"><span class="knob"></span></button></td>
+        </tr>
+      `).join('')}
+    </table>
+  `;
+  prev.querySelectorAll('.rowswitch').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      const row = m.rows[+b.dataset.i];
+      row.accepted = !row.accepted;
+      renderPreview();
+      showToast(row.accepted ? `${row.el} suggestion restored for ${m.name}` : `${row.el} reverted to master for ${m.name}`);
+    });
+  });
+}
+
+function renderFooter(){
+  const note = document.getElementById('note');
+  const cta = document.getElementById('continueBtn');
+  const m = markets.find(x=>x.id===currentId);
+  const next = nextPendingAfter(currentId);
+  const confirmedCount = markets.filter(x=>x.confirmed).length;
+
+  cta.disabled = false;
+
+  if(confirmedCount === markets.length){
+    note.textContent = `All ${markets.length} markets confirmed`;
+    cta.textContent = 'Continue to Results →';
+    cta.onclick = ()=> showToast('All markets confirmed – opening Results.');
+    return;
+  }
+
+  note.textContent = `${confirmedCount} of ${markets.length} confirmed`;
+
+  if(m.confirmed){
+    cta.textContent = next ? `Reviewed ✓ – go to ${next.name} →` : 'Reviewed ✓';
+    cta.onclick = ()=>{
+      if(!next) return;
+      currentId = next.id;
+      renderChips(); renderPreview(); renderFooter();
+    };
+  } else {
+    cta.textContent = (next && next.id !== m.id) ? `Confirm ${m.name}, next: ${next.name} →` : `Confirm ${m.name} →`;
+    cta.onclick = ()=>{
+      m.confirmed = true;
+      showToast(`${m.name} confirmed`);
+      const n = nextPendingAfter(currentId);
+      if(n) currentId = n.id;
+      renderChips(); renderPreview(); renderFooter();
+    };
+  }
+}
+
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(window.__t);
+  window.__t = setTimeout(()=> t.classList.remove('show'), 1600);
+}
+
+document.getElementById('backBtn').addEventListener('click', ()=> showToast('Would return to Markets – out of scope for this screen.'));
+document.getElementById('vframe').addEventListener('click', ()=> showToast('Would play the master cut – out of scope for this screen.'));
+
+renderChips(); renderPreview(); renderFooter();
+</script>
+</body>
+</html>

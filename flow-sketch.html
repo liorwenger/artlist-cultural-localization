@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Localization – Flow sketch</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root{
+    --bg:#0c0c0e; --panel:#19191c; --panel-line:#2a2a2e; --ink:#f2f2f3; --ink-dim:#9a9aa0;
+    --yellow:#f5e14f; --green:#8fd13f; --blue:#4f8cff; --pink:#F893C6; --indigo:#6a4ff0;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  p{margin:0;}
+
+  /* app chrome */
+  .topbar{display:flex;align-items:center;gap:16px;padding:12px 22px;border-bottom:1px solid var(--panel-line);}
+  .back{width:30px;height:30px;border-radius:8px;background:var(--panel);display:flex;align-items:center;justify-content:center;color:var(--ink-dim);font-size:15px;flex-shrink:0;}
+  .logo{width:30px;height:30px;border-radius:8px;background:var(--yellow);display:flex;align-items:center;justify-content:center;font-weight:800;color:#1b1b1d;font-size:16px;flex-shrink:0;}
+  .topbar-title{font-size:14px;font-weight:600;}
+  .topbar-sub{font-size:11.5px;color:var(--ink-dim);margin-top:1px;}
+  .topbar-spacer{flex:1;}
+  .credits-pill{background:var(--yellow);color:#1b1b1d;font-weight:700;font-size:12.5px;padding:8px 16px;border-radius:999px;}
+  .saved{font-size:11.5px;color:var(--ink-dim);margin-right:16px;}
+
+  /* canvas */
+  .canvas-wrap{position:relative;overflow-x:auto;padding:70px 60px 90px;}
+  .canvas{position:relative;width:1880px;height:1180px;}
+  .bg-grid{position:absolute;inset:-90px -60px auto -60px;height:calc(100% + 160px);
+    background-image:radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px);
+    background-size:26px 26px;}
+
+  svg.wires{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none;}
+  svg.wires path{fill:none;stroke:var(--green);stroke-width:1.6;opacity:.85;}
+  .port{position:absolute;width:9px;height:9px;border-radius:50%;background:var(--green);border:2px solid #0c0c0e;z-index:3;}
+  .port.in{background:var(--blue);}
+
+  .node{position:absolute;width:210px;background:var(--panel);border:1px solid var(--panel-line);border-radius:12px;box-shadow:0 14px 30px -18px rgba(0,0,0,.6);}
+  .node-head{display:flex;align-items:center;gap:8px;padding:9px 11px;border-bottom:1px solid var(--panel-line);}
+  .node-ic{width:16px;height:16px;border-radius:4px;flex-shrink:0;}
+  .node-head span{font-size:11.5px;font-weight:600;color:var(--ink);flex:1;}
+  .node-head .dots{color:var(--ink-dim);font-size:13px;}
+  .node-body{padding:11px 12px 13px;}
+  .node-body p{font-size:10.8px;line-height:1.5;color:var(--ink-dim);}
+  .node-run{margin-top:10px;display:inline-flex;align-items:center;gap:5px;background:#101012;border:1px solid var(--panel-line);border-radius:7px;padding:5px 10px;font-size:10.5px;color:var(--ink-dim);float:right;}
+
+  .thumb{width:100%;aspect-ratio:16/10.5;border-radius:8px;margin-bottom:9px;display:flex;align-items:flex-end;padding:9px;background-size:cover;background-position:center;}
+  .thumb span{background:rgba(0,0,0,.55);color:#fff;font-size:10px;font-weight:700;padding:3px 7px;border-radius:5px;letter-spacing:.02em;}
+
+  .sticky{position:absolute;width:150px;background:var(--yellow);color:#1b1b1d;font-size:11px;font-weight:700;line-height:1.4;padding:12px 13px;border-radius:5px;box-shadow:0 8px 18px -8px rgba(0,0,0,.5);transform:rotate(-1.2deg);}
+
+  .lane-label{position:absolute;left:0;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);text-transform:uppercase;letter-spacing:.08em;}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="back">←</div>
+  <div class="logo">Δ</div>
+  <div>
+    <div class="topbar-title">Cultural Localization</div>
+    <div class="topbar-sub">Flow · Stride – "Every Morning"</div>
+  </div>
+  <div class="topbar-spacer"></div>
+  <div class="saved">✓ Saved · just now</div>
+  <div class="credits-pill">Get More Credits</div>
+</div>
+
+<div class="canvas-wrap">
+<div class="canvas">
+  <div class="bg-grid"></div>
+
+  <div class="lane-label" style="top:34px;">Step 01 · Source</div>
+  <div class="lane-label" style="top:34px;left:330px;">Step 02 · Breakdown</div>
+  <div class="lane-label" style="top:-18px;left:720px;">Step 03 · Markets &amp; Suggestions</div>
+  <div class="lane-label" style="top:34px;left:1620px;">Step 04 · Results</div>
+
+  <svg class="wires" viewBox="0 0 1880 1180">
+    <!-- start -> breakdown -->
+    <path d="M 250,170 C 300,170 300,170 350,170"/>
+    <!-- breakdown -> 5 market branches -->
+    <path d="M 580,170 C 650,170 650,90  720,90"/>
+    <path d="M 580,170 C 650,170 650,310 720,310"/>
+    <path d="M 580,170 C 650,170 650,530 720,530"/>
+    <path d="M 580,170 C 650,170 650,750 720,750"/>
+    <path d="M 580,170 C 650,170 650,970 720,970"/>
+    <!-- prompt -> generator per branch -->
+    <path d="M 950,110 C 1010,110 1010,110 1070,110"/>
+    <path d="M 950,330 C 1010,330 1010,330 1070,330"/>
+    <path d="M 950,550 C 1010,550 1010,550 1070,550"/>
+    <path d="M 950,770 C 1010,770 1010,770 1070,770"/>
+    <path d="M 950,990 C 1010,990 1010,990 1070,990"/>
+    <!-- generator -> results column (all converge on one input) -->
+    <path d="M 1300,170 C 1420,170 1420,170 1540,170"/>
+    <path d="M 1300,390 C 1420,390 1420,170 1540,170"/>
+    <path d="M 1300,610 C 1420,610 1420,170 1540,170"/>
+    <path d="M 1300,830 C 1420,830 1420,170 1540,170"/>
+    <path d="M 1300,1050 C 1420,1050 1420,170 1540,170"/>
+  </svg>
+
+  <!-- START -->
+  <div class="node" style="left:40px;top:100px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Start · Master Cut</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#2a2a2e,#17171a);"><span>Stride – Every Morning</span></div>
+      <p>Upload the master cut, transcript and shot list.</p>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port" style="left:250px;top:166px;"></div>
+
+  <!-- BREAKDOWN -->
+  <div class="node" style="left:350px;top:100px;width:230px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Breakdown</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <p>Tag every element Keep or Localize, with a one-line reason. One global decision – applies to every market branch below, nothing re-asked downstream.</p>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:346px;top:166px;"></div>
+  <div class="port" style="left:580px;top:166px;"></div>
+
+  <!-- market branches -->
+  <!-- Japan -->
+  <div class="sticky" style="left:720px;top:12px;">Japan</div>
+  <div class="node" style="left:720px;top:72px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Localize</span><span class="dots">⋯</span></div>
+    <div class="node-body"><p>Male VO, polite-formal register. City-pop downtempo, 96 BPM. On-screen text in kanji, vertical. Deadpan joke dropped – quiet focus beat instead.</p></div>
+  </div>
+  <div class="port in" style="left:716px;top:106px;"></div>
+  <div class="port" style="left:930px;top:106px;"></div>
+  <div class="node" style="left:1070px;top:72px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Generator · Japan</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#F893C6,#440DEF);"><span>🇯🇵 Japan cut</span></div>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:1066px;top:106px;"></div>
+
+  <!-- Brazil -->
+  <div class="sticky" style="left:720px;top:232px;">Brazil</div>
+  <div class="node" style="left:720px;top:292px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Localize</span><span class="dots">⋯</span></div>
+    <div class="node-body"><p>Male VO, warm energetic read. Swap to Brazilian funk-pop bed. Casting kept – only wardrobe styling shifts.</p></div>
+  </div>
+  <div class="port in" style="left:716px;top:326px;"></div>
+  <div class="port" style="left:930px;top:326px;"></div>
+  <div class="node" style="left:1070px;top:292px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Generator · Brazil</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#9FD8FF,#440DEF);"><span>🇧🇷 Brazil cut</span></div>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:1066px;top:326px;"></div>
+
+  <!-- South Korea -->
+  <div class="sticky" style="left:720px;top:452px;">South Korea</div>
+  <div class="node" style="left:720px;top:512px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Localize</span><span class="dots">⋯</span></div>
+    <div class="node-body"><p>Female VO, bright conversational tone. Hangul on-screen text. Casting swapped to early-30s understated styling.</p></div>
+  </div>
+  <div class="port in" style="left:716px;top:546px;"></div>
+  <div class="port" style="left:930px;top:546px;"></div>
+  <div class="node" style="left:1070px;top:512px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Generator · South Korea</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#fff24d,#440DEF);"><span>🇰🇷 Korea cut</span></div>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:1066px;top:546px;"></div>
+
+  <!-- India -->
+  <div class="sticky" style="left:720px;top:672px;">India</div>
+  <div class="node" style="left:720px;top:732px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Localize</span><span class="dots">⋯</span></div>
+    <div class="node-body"><p>Hindi VO, imperative energetic read. Pricing shown in ₹. Pacing tightened – faster cuts tested stronger locally.</p></div>
+  </div>
+  <div class="port in" style="left:716px;top:766px;"></div>
+  <div class="port" style="left:930px;top:766px;"></div>
+  <div class="node" style="left:1070px;top:732px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Generator · India</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#F893C6,#9FD8FF);"><span>🇮🇳 India cut</span></div>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:1066px;top:766px;"></div>
+
+  <!-- Germany -->
+  <div class="sticky" style="left:720px;top:892px;">Germany</div>
+  <div class="node" style="left:720px;top:952px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--indigo);"></div><span>Prompt · Localize</span><span class="dots">⋯</span></div>
+    <div class="node-body"><p>Male VO, direct matter-of-fact register. Humor beat kept as-is – tested well with the target segment. Latin on-screen text kept.</p></div>
+  </div>
+  <div class="port in" style="left:716px;top:986px;"></div>
+  <div class="port" style="left:930px;top:986px;"></div>
+  <div class="node" style="left:1070px;top:952px;">
+    <div class="node-head"><div class="node-ic" style="background:#3b3b40;"></div><span>Generator · Germany</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <div class="thumb" style="background:linear-gradient(135deg,#9FD8FF,#F893C6);"><span>🇩🇪 Germany cut</span></div>
+      <div class="node-run">Run ▾</div>
+    </div>
+  </div>
+  <div class="port in" style="left:1066px;top:986px;"></div>
+
+  <!-- results column -->
+  <div class="port in" style="left:1536px;top:166px;"></div>
+  <div class="node" style="left:1540px;top:100px;width:220px;">
+    <div class="node-head"><div class="node-ic" style="background:var(--yellow);"></div><span>Results · 5 markets</span><span class="dots">⋯</span></div>
+    <div class="node-body">
+      <p>Five finished, market-ready cuts – same campaign idea, five culturally rebuilt executions. Export individually or as a set.</p>
+      <div class="node-run">Export ▾</div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+</body>
+</html>

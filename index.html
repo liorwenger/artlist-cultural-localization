@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cultural Localization – Artlist AI Toolkit</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>
+  :root{
+    --pink:#F893C6; --indigo:#440DEF; --ink:#13102e; --cream:#fff8fb;
+    --yellow:#fff24d; --yellow-ink:#433800; --lightblue:#9FD8FF;
+    --ink-dim:#4a3f73; --ink-faint:#7a6fa8;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    --display:'Archivo',var(--sans);
+    --impact:'Anton',var(--display);
+    --mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  html,body{margin:0;background:var(--cream);color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;}
+  h1,h2,h3{margin:0;}
+  p{margin:0;}
+  button{font-family:inherit;cursor:pointer;background:none;border:none;color:inherit;}
+
+  .grid-pink{
+    background-color:var(--pink);
+    background-image:repeating-linear-gradient(0deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px),
+                      repeating-linear-gradient(90deg, rgba(68,13,239,.28) 0 2px, transparent 2px 56px);
+  }
+  .solid-pink{background-color:var(--pink);}
+  .grid-grey{
+    background-color:#ececf1;
+    background-image:repeating-linear-gradient(0deg, rgba(19,16,46,.08) 0 1.5px, transparent 1.5px 150px),
+                      repeating-linear-gradient(90deg, rgba(19,16,46,.08) 0 1.5px, transparent 1.5px 150px);
+  }
+  .grid-indigo{
+    background-color:var(--indigo);
+  }
+
+  .fold{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:110px 48px;position:relative;}
+  @media (max-width:720px){ .fold{padding:90px 22px;} }
+  .fold-inner{max-width:1180px;margin:0 auto;width:100%;}
+
+  .fold-title{font-family:var(--impact);font-weight:400;text-transform:uppercase;font-size:clamp(34px,5vw,64px);line-height:0.98;letter-spacing:-0.01em;max-width:900px;}
+  .fold-title .acc{color:var(--indigo);font-family:var(--display);font-style:italic;font-weight:700;}
+  .fold-lede{font-size:15.5px;line-height:1.7;color:var(--ink-dim);max-width:620px;margin-top:20px;font-weight:500;}
+
+
+  /* ---------- hero ---------- */
+  .hero-fold{height:900px;min-height:0;justify-content:flex-start;padding-top:150px;}
+  .hero-fold .fold-inner{position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;}
+  .hero-eyebrow{display:flex;flex-direction:column;align-items:center;gap:8px;margin-bottom:32px;position:relative;z-index:2;}
+  .he-line1{font-family:var(--sans);font-weight:700;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);}
+  .he-line2{font-family:var(--sans);font-weight:800;font-size:12.5px;color:var(--indigo);}
+  .hero-fold h1{position:relative;z-index:2;text-align:center;font-family:var(--impact);font-weight:400;text-transform:uppercase;line-height:0.94;font-size:clamp(46px,8vw,104px);letter-spacing:-0.01em;}
+  .hero-fold h1 .cycle-word{color:var(--ink);background:var(--yellow);padding:0 .08em;font-family:var(--display);font-style:italic;font-weight:700;text-transform:none;display:inline-block;transition:opacity .22s;}
+  .hero-byline{position:relative;z-index:2;font-family:var(--sans);font-weight:600;font-size:12.5px;color:var(--ink);margin-top:40px;}
+
+  .hero-photo{position:absolute;perspective:1600px;z-index:3;}
+  .hero-photo-inner{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform 1.6s cubic-bezier(.45,0,.2,1);}
+  .hero-photo.flipped .hero-photo-inner{transform:rotateY(180deg);}
+  .hero-photo-face{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden;overflow:hidden;}
+  .hero-photo-face.back{transform:rotateY(180deg);}
+  .hero-photo-face img{width:100%;height:100%;object-fit:cover;display:block;}
+
+  .hero-photo-1{top:-64px;right:-150px;width:clamp(190px,21vw,300px);aspect-ratio:541/414;transform:rotate(8deg);}
+  .hero-photo-2{top:330px;left:-10px;width:clamp(190px,21vw,300px);aspect-ratio:541/414;transform:rotate(-7deg);}
+  @media (max-width:900px){ .hero-photo-1{top:-16px;right:-20px;width:clamp(130px,22vw,200px);} .hero-photo-2{top:260px;width:clamp(130px,22vw,200px);} }
+  @media (max-width:600px){ .hero-photo-1{width:110px;right:0;} .hero-photo-2{top:230px;width:110px;} }
+
+  .hero-shape{position:absolute;display:block;pointer-events:none;}
+  /* mic/note live INSIDE their photo card now, so they can never end up positioned off-screen */
+  .hero-photo-1 .hero-shape-mic{bottom:-224px;right:-65px;width:155px;z-index:4;opacity:.2;}
+  .hero-photo-2 .hero-shape-note{top:-212px;left:14px;width:150px;z-index:4;opacity:.2;}
+
+  .scroll-cue{position:absolute;bottom:36px;left:48px;font-family:var(--mono);font-weight:700;font-size:11px;color:var(--ink);display:flex;align-items:center;gap:8px;}
+  .scroll-cue .dot{width:7px;height:16px;border:1.5px solid var(--ink);border-radius:5px;position:relative;}
+  .scroll-cue .dot::after{content:'';position:absolute;top:3px;left:50%;width:2px;height:4px;background:var(--ink);transform:translateX(-50%);animation:cueMove 1.6s ease-in-out infinite;}
+  @keyframes cueMove{0%,100%{top:3px;opacity:1;}50%{top:8px;opacity:.3;}}
+
+  /* ---------- pinned feature-overview stack ---------- */
+  .pin-section{position:relative;height:500vh;}
+  .pin-sticky{position:sticky;top:0;height:100vh;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 24px;background-color:var(--indigo);
+  }
+  .pin-heading{position:relative;font-family:var(--impact);font-weight:400;text-transform:none;font-size:clamp(46px,8vw,104px);line-height:0.94;color:#fff;margin-bottom:92px;text-align:center;max-width:1000px;}
+  .card-stack{position:relative;width:min(940px,80vw);height:320px;}
+  @media (max-width:900px){ .card-stack{width:88vw;height:360px;} }
+  @media (max-width:640px){ .card-stack{height:380px;} }
+  .stack-card{position:absolute;inset:0;background:#e9e6dd;border-radius:26px;padding:40px 48px 32px;box-shadow:0 26px 60px -18px rgba(0,0,0,.5);transition:transform .6s cubic-bezier(.22,.9,.3,1);}
+  @media (max-width:640px){ .stack-card{padding:28px 26px 22px;} }
+  .stack-card[data-i="0"]{transform:translate(130vw,0) rotate(-1.5deg);}
+  .stack-card[data-i="0"].active{transform:translate(0,0) rotate(-1.5deg);}
+  .stack-card[data-i="1"]{transform:translate(130vw,10px) rotate(1.5deg);}
+  .stack-card[data-i="1"].active{transform:translate(10px,10px) rotate(1.5deg);}
+  .stack-card[data-i="2"]{transform:translate(130vw,22px) rotate(-2deg);}
+  .stack-card[data-i="2"].active{transform:translate(-8px,22px) rotate(-2deg);}
+  .stack-card[data-i="3"]{transform:translate(130vw,34px) rotate(1deg);}
+  .stack-card[data-i="3"].active{transform:translate(6px,34px) rotate(1deg);}
+  .stack-card[data-i="4"]{transform:translate(130vw,46px) rotate(-1deg);}
+  .stack-card[data-i="4"].active{transform:translate(-4px,46px) rotate(-1deg);}
+  .sc-q{font-family:var(--display);font-weight:800;font-size:clamp(18px,2.4vw,30px);margin-bottom:18px;max-width:none;white-space:nowrap;}
+  .sc-a{font-size:16px;line-height:1.65;color:#4a4530;max-width:74%;}
+  .sc-icon{position:absolute;width:176px;height:176px;object-fit:contain;filter:drop-shadow(0 18px 30px rgba(0,0,0,.35));}
+  .stack-card[data-i="0"] .sc-icon{top:-50px;right:-32px;transform:rotate(-6deg);}
+  .stack-card[data-i="1"] .sc-icon{top:50%;right:-56px;transform:translateY(-50%) rotate(6deg);}
+  .stack-card[data-i="2"] .sc-icon{bottom:-40px;right:-8px;transform:rotate(-5deg);}
+  .stack-card[data-i="3"] .sc-icon{top:12%;right:-44px;width:220px;height:220px;transform:rotate(-9deg);}
+  .stack-card[data-i="4"] .sc-icon{bottom:-36px;right:-28px;transform:rotate(7deg);}
+  @media (max-width:640px){
+    .sc-icon{width:74px;height:74px;}
+    .stack-card[data-i="0"] .sc-icon{top:-16px;right:-10px;}
+    .stack-card[data-i="1"] .sc-icon{top:38%;right:-18px;transform:translateY(-50%) rotate(6deg);}
+    .stack-card[data-i="2"] .sc-icon{bottom:-14px;right:-6px;}
+    .stack-card[data-i="3"] .sc-icon{top:8%;right:-14px;width:92px;height:92px;}
+    .stack-card[data-i="4"] .sc-icon{bottom:-12px;right:-8px;}
+    .sc-q{max-width:66%;white-space:normal;} .sc-a{max-width:100%;}
+  }
+  .sc-num{position:absolute;bottom:22px;left:48px;font-family:var(--mono);font-weight:700;font-size:12px;color:#9b937a;}
+
+  /* ---------- user flow ---------- */
+  .flow-fold .fold-inner{max-width:1560px;}
+  .flow-fold .fold-title{text-align:center;max-width:none;font-size:clamp(46px,8vw,104px);}
+  .flow-fold .fold-lede{margin-left:auto;margin-right:auto;text-align:center;}
+  .flow-strip{display:flex;align-items:center;justify-content:center;margin-top:50px;padding:34px 6px 8px;}
+  .flow-item{position:relative;flex:1 1 0;min-width:0;max-width:260px;}
+  .flow-shape{display:block;width:100%;height:auto;}
+  .flow-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;text-align:center;padding:42px 28px 0;}
+  .flow-num{font-family:var(--display);font-weight:900;font-size:clamp(30px,3.2vw,40px);color:var(--indigo);margin-bottom:6px;}
+  .flow-name{font-family:var(--display);font-weight:800;font-size:15px;text-transform:uppercase;letter-spacing:.01em;color:var(--ink);margin-bottom:7px;}
+  .flow-desc{font-size:11px;line-height:1.4;color:var(--ink-dim);font-weight:500;max-width:135px;}
+  .flow-connector{flex:0 0 34px;height:18px;align-self:center;background:#fff;border-top:2.5px solid var(--ink);border-bottom:2.5px solid var(--ink);margin:0 -1px;}
+  .flow-badge{position:absolute;top:-42px;right:-24px;width:111px;height:111px;transform:rotate(-8deg);}
+  @media (max-width:980px){ .flow-strip{justify-content:flex-start;} .flow-item{width:160px;} .flow-connector{width:32px;} .flow-badge{width:90px;height:90px;top:-33px;right:-18px;} }
+  @media (max-width:640px){ .flow-item{width:140px;} .flow-connector{width:24px;height:14px;} .flow-badge{width:78px;height:78px;top:-27px;right:-15px;} }
+
+  /* ---------- screen folds ---------- */
+  .screen-fold{background:var(--cream);}
+  .screen-fold .fold-inner{max-width:1440px;}
+  .step-pill{display:inline-flex;align-items:center;border:2.5px solid var(--ink);border-radius:999px;padding:10px 26px;font-family:var(--sans);font-weight:600;font-size:14px;color:var(--ink);background:transparent;opacity:.5;margin-bottom:22px;}
+  .sc-grid{display:grid;grid-template-columns:0.85fr 1.5fr;gap:48px;align-items:center;}
+  @media (max-width:900px){ .sc-grid{grid-template-columns:1fr;} }
+  .sc-text .fold-title{margin-bottom:16px;color:var(--indigo);}
+  .sc-text .fold-title .acc{color:inherit;font-family:inherit;font-style:normal;font-weight:inherit;}
+  .sc-divider{width:100%;max-width:480px;height:1px;background:rgba(19,16,46,.14);border:none;margin:24px 0;}
+  .sc-callouts{display:flex;flex-direction:column;gap:22px;max-width:480px;margin-top:0;}
+  .sc-callout-row{font-size:13.5px;line-height:1.6;color:var(--ink-dim);font-weight:500;}
+  .sc-callout-row b{color:var(--indigo);font-family:var(--display);font-weight:800;margin-right:5px;}
+
+  .browser-frame{border:2.5px solid var(--ink);border-radius:18px;overflow:hidden;background:#fff;}
+  .browser-bar{display:flex;align-items:center;gap:7px;padding:11px 15px;background:var(--cream);border-bottom:2.5px solid var(--ink);}
+  .browser-dot{width:9px;height:9px;border-radius:50%;background:#d8d8e2;border:1px solid var(--ink);}
+  .browser-url{margin-left:9px;font-family:var(--mono);font-size:10.5px;color:var(--ink-dim);background:#fff;border:1.5px solid var(--ink);border-radius:999px;padding:4px 13px;flex:1;max-width:300px;}
+  .browser-frame iframe{display:block;width:100%;height:min(54vh,520px);border:none;background:#F893C6;}
+  .browser-frame img{display:block;width:100%;height:auto;}
+  .openlink{display:inline-flex;align-items:center;gap:7px;margin-top:16px;font-family:var(--display);font-weight:700;font-size:12.5px;text-decoration:none;border:2.5px solid var(--ink);border-radius:999px;padding:9px 18px;color:var(--ink);background:#fff;box-shadow:3px 3px 0 var(--ink);}
+  .openlink:hover{background:var(--yellow);}
+
+  /* ---------- UI exploration ---------- */
+  .ui-grid{display:grid;grid-template-columns:1.3fr 1fr;gap:34px;margin-top:34px;align-items:start;}
+  @media (max-width:860px){ .ui-grid{grid-template-columns:1fr;} }
+  .ui-points{display:flex;flex-direction:column;gap:16px;}
+  .ui-point{font-size:13.5px;line-height:1.6;color:var(--ink-dim);padding-left:18px;border-left:3px solid var(--indigo);font-weight:500;}
+  .ui-point b{color:var(--ink);font-weight:800;}
+  .swatches{background:#fff;border:2.5px solid var(--ink);border-radius:18px;padding:22px;box-shadow:5px 5px 0 var(--ink);}
+  .swatches .sw-label{font-family:var(--mono);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-faint);margin-bottom:14px;}
+  .sw-row{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .sw-chip{display:flex;align-items:center;gap:8px;font-family:var(--mono);font-weight:600;font-size:11px;color:var(--ink);border:2px solid var(--ink);border-radius:999px;padding:5px 11px 5px 7px;}
+  .sw-dot{width:14px;height:14px;border-radius:50%;border:1.5px solid var(--ink);flex-shrink:0;}
+  .swatches p{font-size:12.5px;line-height:1.6;color:var(--ink-dim);font-weight:500;}
+
+  /* ---------- reasoning / alternatives ---------- */
+  .alt-fold .fold-inner{max-width:1400px;}
+  .alt-split{display:grid;grid-template-columns:2fr 3fr;position:relative;align-items:start;}
+  .alt-split::before{content:'';position:absolute;top:-60px;bottom:-60px;left:40%;width:1px;background:rgba(255,255,255,.25);}
+  @media (max-width:860px){ .alt-split{grid-template-columns:1fr;gap:40px;} .alt-split::before{display:none;} }
+  .alt-left{padding-right:40px;}
+  .alt-left .fold-title{color:#fff;font-size:clamp(46px,8vw,104px);max-width:none;line-height:1.15;}
+  .alt-left img{width:clamp(220px,20vw,340px);height:auto;margin-top:40px;display:block;}
+  @media (max-width:640px){ .alt-left img{width:180px;} }
+  .alt-right{padding-left:64px;display:flex;flex-direction:column;gap:clamp(60px,9vh,110px);}
+  @media (max-width:860px){ .alt-right{padding-left:0;} }
+  .alt-item h3{font-family:var(--impact);font-weight:400;font-size:clamp(22px,2.7vw,32px);color:#947afc;margin-bottom:12px;}
+  .alt-item p{font-size:13.5px;line-height:1.75;color:#fff;max-width:560px;font-weight:500;}
+
+  /* ---------- my process ---------- */
+  .process-fold .fold-inner{max-width:1400px;}
+  .proc-split{display:grid;grid-template-columns:2fr 3fr;position:relative;align-items:start;}
+  .proc-split::before{content:'';position:absolute;top:-60px;bottom:-60px;left:40%;width:1px;background:rgba(255,255,255,.25);}
+  @media (max-width:860px){ .proc-split{grid-template-columns:1fr;gap:40px;} .proc-split::before{display:none;} }
+  .proc-left .fold-title{color:#fff;font-size:clamp(46px,8vw,104px);max-width:none;}
+  .proc-left img{width:clamp(280px,26vw,420px);height:auto;margin:80px auto 0;display:block;}
+  @media (max-width:640px){ .proc-left img{width:220px;} }
+  .proc-right{padding-left:64px;display:flex;flex-direction:column;gap:clamp(60px,9vh,110px);}
+  @media (max-width:860px){ .proc-right{padding-left:0;} }
+  .proc-item h3{font-family:var(--impact);font-weight:400;font-size:clamp(22px,2.7vw,32px);color:#947afc;margin-bottom:12px;}
+  .proc-item p{font-size:13.5px;line-height:1.75;color:#fff;max-width:560px;font-weight:500;}
+  .proc-item p + p{margin-top:12px;}
+  .proc-item .openlink + p{margin-top:16px;}
+  .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:30px;}
+  @media (max-width:780px){ .why-grid{grid-template-columns:1fr;} }
+  .why-card{background:#fff;border:2.5px solid var(--ink);border-radius:16px;padding:20px 22px;box-shadow:5px 5px 0 var(--ink);}
+  .why-card h3{font-family:var(--display);font-weight:800;font-size:15.5px;margin-bottom:8px;color:var(--ink);}
+  .why-card p{font-size:13px;line-height:1.6;color:var(--ink-dim);font-weight:500;}
+  .alt-row{margin-top:24px;background:var(--indigo);border:2.5px solid var(--ink);border-radius:16px;padding:22px 24px;box-shadow:5px 5px 0 var(--ink);}
+  .alt-row .ov-label{font-family:var(--mono);font-weight:700;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:var(--yellow);margin-bottom:10px;}
+  .alt-row p{font-size:13px;line-height:1.65;color:#e4defc;}
+  .alt-row p b{color:#fff;}
+  .alt-row p + p{margin-top:8px;}
+
+  /* ---------- footer ---------- */
+  .footer-fold{min-height:60vh;background-color:var(--yellow);position:relative;
+    background-image:repeating-linear-gradient(135deg, rgba(67,56,0,.12) 0 2px, transparent 2px 24px);
+    display:flex;align-items:center;justify-content:center;text-align:center;}
+  .footer-fold .fold-title{max-width:none;margin:0 auto;font-size:clamp(46px,8vw,104px);line-height:0.94;}
+  .footer-photo-1{left:9%;top:12%;width:clamp(110px,10vw,190px);aspect-ratio:4/3;transform:rotate(-5deg);}
+  .footer-photo-2{left:24%;top:68%;width:clamp(70px,6vw,115px);aspect-ratio:4/3;transform:rotate(4deg);}
+  .footer-photo-3{right:9%;top:12%;width:clamp(105px,10vw,185px);aspect-ratio:4/3;transform:rotate(5deg);}
+  .footer-photo-4{right:12%;top:70%;width:clamp(125px,11.5vw,225px);aspect-ratio:4/3;transform:rotate(-4deg);}
+  @media (max-width:860px){
+    .footer-photo-1,.footer-photo-2,.footer-photo-3,.footer-photo-4{display:none;}
+  }
+  .footer-fold p{color:var(--yellow-ink);font-size:clamp(9px,2.3vw,13.5px);max-width:none;white-space:nowrap;margin:20px auto 0;line-height:1.6;font-weight:600;}
+
+  /* ---------- lightbox ---------- */
+  .lightbox{position:fixed;inset:0;background:rgba(10,8,30,.86);z-index:100;display:none;align-items:flex-start;justify-content:center;padding:36px 28px;overflow-y:auto;}
+  .lightbox.open{display:flex;}
+  .lightbox-frame{width:min(1680px,97vw);height:min(86vh,940px);background:#fff;border-radius:16px;overflow:hidden;position:relative;box-shadow:0 30px 80px -20px rgba(0,0,0,.6);flex-shrink:0;}
+  .lightbox-frame iframe{width:100%;height:100%;border:none;display:block;}
+  .lightbox-close{position:absolute;top:14px;right:14px;z-index:2;width:36px;height:36px;border-radius:50%;background:#fff;border:2.5px solid var(--ink);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;cursor:pointer;box-shadow:3px 3px 0 var(--ink);}
+</style>
+</head>
+<body>
+
+
+<!-- hero -->
+<section class="fold hero-fold grid-grey" id="fold-1">
+  <div class="fold-inner">
+    <div class="hero-eyebrow">
+      <span class="he-line1">Artlist Home Assignment</span>
+      <span class="he-line2">New AI-powered feature</span>
+    </div>
+    <h1>Localize this video<br>to <span class="cycle-word" id="cycleWord">Indian</span> market</h1>
+    <div class="hero-byline">Lior Wenger – 10.2026</div>
+
+    <div class="hero-photo hero-photo-1" id="heroPhoto1">
+      <div class="hero-photo-inner">
+        <div class="hero-photo-face front"><img src="icons-artlist/header1-A.png" alt=""></div>
+        <div class="hero-photo-face back"><img src="icons-artlist/header1-B.png" alt=""></div>
+      </div>
+      <img class="hero-shape hero-shape-mic" src="icons-artlist/mic.png" alt="">
+    </div>
+    <div class="hero-photo hero-photo-2" id="heroPhoto2">
+      <div class="hero-photo-inner">
+        <div class="hero-photo-face front"><img src="icons-artlist/header2-A.png" alt=""></div>
+        <div class="hero-photo-face back"><img src="icons-artlist/header2-B.png" alt=""></div>
+      </div>
+      <img class="hero-shape hero-shape-note" src="icons-artlist/note.png" alt="">
+    </div>
+  </div>
+  <div class="scroll-cue"><span class="dot"></span>Scroll</div>
+</section>
+
+<!-- feature overview: pinned stack -->
+<section class="pin-section" id="pinSection">
+  <div class="pin-sticky">
+    <h2 class="pin-heading">Feature Overview</h2>
+    <div class="card-stack" id="cardStack">
+      <div class="stack-card" data-i="0">
+        <img class="sc-icon" src="icons-artlist/icon1.png" alt="">
+        <div class="sc-q">What is the AI feature?</div>
+        <div class="sc-a">An AI feature that scans a finished ad, proposes what's locked (identical everywhere) vs. local (actor, voice, music, humor, pacing, on-screen text), then generates specific, reasoned edits per market – never a silent blanket translation.</div>
+        <div class="sc-num">01 / 05</div>
+      </div>
+      <div class="stack-card" data-i="1">
+        <img class="sc-icon" src="icons-artlist/icon2.png" alt="">
+        <div class="sc-q">What user problem does it solve?</div>
+        <div class="sc-a">Global campaigns are either expensive to recreate by hand per market, or awkwardly translated in place. Knowing which parts of a creative idea are invariant and which need to be culturally rebuilt is the actual, unsolved problem.</div>
+        <div class="sc-num">02 / 05</div>
+      </div>
+      <div class="stack-card" data-i="2">
+        <img class="sc-icon" src="icons-artlist/icon3.png" alt="">
+        <div class="sc-q">Who is the target user?</div>
+        <div class="sc-a">Global marketing teams and agencies shipping one campaign to many markets at once – an enterprise/agency audience.</div>
+        <div class="sc-num">03 / 05</div>
+      </div>
+      <div class="stack-card" data-i="3">
+        <img class="sc-icon" src="icons-artlist/icon4.png" alt="">
+        <div class="sc-q">Why is this the right fit for Artlist?</div>
+        <div class="sc-a">Artlist is already moving from individual creators toward brands and agencies running serious, multi-market campaigns – this is a B2B-shaped problem, right in that direction. It also already owns the pieces this needs: dubbing, lip-sync, AI avatars, a licensed, culturally-broad catalog. Competitors solve the mechanical "how"; none solve the "what and why" with visible reasoning.</div>
+        <div class="sc-num">04 / 05</div>
+      </div>
+      <div class="stack-card" data-i="4">
+        <img class="sc-icon" src="icons-artlist/icon5.png" alt="">
+        <div class="sc-q">Validating the Problem</div>
+        <div class="sc-a">Brands already pay more for judgment, not just translation – it's called transcreation, and it costs 40–60% more than plain translation. Getting it wrong is expensive too: HSBC's bad translation led to a $10B rebrand. And tools like HeyGen still only handle the mechanical part – transcribe, translate, lip-sync – with no reasoning about what should actually change per market.</div>
+        <div class="sc-num">05 / 05</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- user flow -->
+<section class="fold flow-fold solid-pink" id="fold-3">
+  <div class="fold-inner">
+    <h2 class="fold-title">The Flow</h2>
+    <div class="flow-strip">
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-icon.png" alt="">
+        <div class="flow-content">
+          <div class="flow-num">00</div>
+          <div class="flow-name">Start</div>
+          <div class="flow-desc">Open Flows, click the new Localization tab (NEW), then start from a template or blank.</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-icon.png" alt="">
+        <div class="flow-content">
+          <div class="flow-num">01</div>
+          <div class="flow-name">Source</div>
+          <div class="flow-desc">Upload the master cut, transcript and shot list.</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-iconcore.png" alt="">
+        <img class="flow-badge" src="icons-artlist/core-strp.png" alt="Core step">
+        <div class="flow-content">
+          <div class="flow-num">02</div>
+          <div class="flow-name">Breakdown</div>
+          <div class="flow-desc">AI tags each element Keep or Localize, with a reason.</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-icon.png" alt="">
+        <div class="flow-content">
+          <div class="flow-num">03</div>
+          <div class="flow-name">Markets</div>
+          <div class="flow-desc">Choose the markets.</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-iconcore.png" alt="">
+        <img class="flow-badge" src="icons-artlist/core-strp.png" alt="Core step">
+        <div class="flow-content">
+          <div class="flow-num">04</div>
+          <div class="flow-name">Suggestions</div>
+          <div class="flow-desc">Confirm the AI's localized read, market by market.</div>
+        </div>
+      </div>
+      <div class="flow-connector"></div>
+      <div class="flow-item">
+        <img class="flow-shape" src="icons-artlist/flow-icon.png" alt="">
+        <div class="flow-content">
+          <div class="flow-num">05</div>
+          <div class="flow-name">Results</div>
+          <div class="flow-desc">Export the finished, market-ready cuts.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- screen 1: breakdown -->
+<section class="fold screen-fold" id="fold-4">
+  <div class="fold-inner">
+    <div class="sc-grid">
+      <div class="sc-text">
+        <div class="step-pill">Step 02</div>
+        <h2 class="fold-title">Keep or <span class="acc">localize</span></h2>
+        <p class="fold-lede">The AI scans the master cut once – brand assets, spoken language, music licensing, visible text – and tags every element Keep or Localize, with a stated reason. The user can override any call before it fans out to every market.</p>
+        <hr class="sc-divider">
+        <div class="sc-callouts">
+          <div class="sc-callout-row"><b>01</b>Every tag comes with a one-line reason – not a black box the producer has to trust blindly.</div>
+          <div class="sc-callout-row"><b>02</b>Two tracks, not one: brand-fixed elements never enter the per-market pipeline at all.</div>
+          <div class="sc-callout-row"><b>03</b>One decision, reused everywhere downstream – this is what keeps Suggestions from re-asking the same question five times.</div>
+        </div>
+      </div>
+      <div class="sc-screen">
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+          </div>
+          <img src="icons-artlist/screen1.png" alt="02 Breakdown screen">
+        </div>
+        <button class="openlink" onclick="openModal('screens/breakdown.html')">Open full size ↗</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- screen 2: suggestions -->
+<section class="fold screen-fold" id="fold-5">
+  <div class="fold-inner">
+    <div class="sc-grid">
+      <div class="sc-text">
+        <div class="step-pill">Step 04</div>
+        <h2 class="fold-title">Confirm by <span class="acc">market</span></h2>
+        <p class="fold-lede">Once markets are chosen, every element flagged Localize gets an AI-generated version per market. The user walks market by market, accepting or reverting each row, confirming one before the flow advances to the next.</p>
+        <hr class="sc-divider">
+        <div class="sc-callouts">
+          <div class="sc-callout-row"><b>01</b>Confirm-and-advance, not a dashboard – the CTA always names the next unconfirmed market.</div>
+          <div class="sc-callout-row"><b>02</b>Any row reverts to the master version without blocking the rest of that market's confirmation.</div>
+          <div class="sc-callout-row"><b>03</b>The five rows here are exactly the five elements Breakdown flagged Localize – the two screens tell one continuous story.</div>
+        </div>
+      </div>
+      <div class="sc-screen">
+        <div class="browser-frame">
+          <div class="browser-bar">
+            <span class="browser-dot"></span><span class="browser-dot"></span><span class="browser-dot"></span>
+          </div>
+          <img src="icons-artlist/screen2.png" alt="04 Suggestions screen">
+        </div>
+        <button class="openlink" onclick="openModal('screens/suggestions.html')">Open full size ↗</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- my process -->
+<section class="fold process-fold grid-indigo" id="fold-6">
+  <div class="fold-inner">
+    <div class="proc-split">
+      <div class="proc-left">
+        <h2 class="fold-title">My process</h2>
+      </div>
+      <div class="proc-right">
+        <div class="proc-item">
+          <h3>Research</h3>
+          <p>Checked how competitors already approach this – HeyGen, Perso, ElevenLabs, Arcads, WPP Open. All solve the mechanical "how": voice cloning, lip-sync, avatar swaps. None solve the "what and why" – deciding, with visible reasoning, what actually needs to change for a given market. Also confirmed Artlist already owns the raw capability this needs – dubbing, lip-sync, AI avatars, a licensed, culturally-broad catalog – just not the judgment layer tying them together.</p>
+        </div>
+        <div class="proc-item">
+          <h3>Architecture</h3>
+          <p>Weighed a few options for how a user reaches this new feature: a new top-nav page, a new flow, an option off the three-dot menu, or something buried inside an existing AI Toolkit session. The place that felt most natural – most correct – was inside Flows: it's exactly the step-based shape Flows already models, so the feature lands where producers already build and manage pipelines, instead of teaching a new navigation pattern. That's precisely where I'd have placed it if the brief had been to work within Artlist's existing design language.</p>
+          <button class="openlink" onclick="openModal('flow-sketch.html')">See it in the Flows ↗</button>
+          <p>But the brief explicitly asked to explore unconventional UI directions and step outside Artlist's existing design system – so I built this as a product with its own separate, entirely different visual language instead. Took it into a playful, fun world, and genuinely enjoyed it 😌</p>
+        </div>
+        <div class="proc-item">
+          <h3>Finding the best solution</h3>
+          <p>Before settling on this one, I tried a few other ways to show the idea: the master video next to each market's version, a world map where each market opens into its own drawer, even a full dashboard – more useful once you're tracking dozens of markets than for getting the first one right. In the end, I picked the version that shows why the AI made each choice, one element at a time, before anything goes out.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- alternatives considered -->
+<section class="fold reasoning-fold alt-fold grid-indigo" id="fold-7">
+  <div class="fold-inner">
+    <div class="alt-split">
+      <div class="alt-left">
+        <h2 class="fold-title">alternatives<br>considered</h2>
+      </div>
+      <div class="alt-right">
+        <div class="alt-item">
+          <h3>1. AI Creative Director</h3>
+          <p>A "director" that walks you through the right steps – for when you want to create something but aren't sure what flow to use, or what you'd actually end up with. Dropped – too small a fix next to localization's bigger swing.</p>
+        </div>
+        <div class="alt-item">
+          <h3>2. Signature</h3>
+          <p>An auto-built style/brand memory across tools, replacing manual style-guide uploads. Dropped – it felt more like a backend fix than a design one, and the brief asked for bold, visible UI, not something invisible.</p>
+        </div>
+        <div class="alt-item">
+          <h3>3. Living Soundtrack</h3>
+          <p>Music auto-synced to video, aimed at a common complaint. Dropped – tested it myself on two real generations and the existing sync already worked fine.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- footer -->
+<section class="footer-fold">
+  <div class="hero-photo footer-photo-1" id="footerPhoto1">
+    <div class="hero-photo-inner">
+      <div class="hero-photo-face front"><img src="icons-artlist/footer1-A.png" alt=""></div>
+      <div class="hero-photo-face back"><img src="icons-artlist/footer1-B.png" alt=""></div>
+    </div>
+  </div>
+  <div class="hero-photo footer-photo-2" id="footerPhoto2">
+    <div class="hero-photo-inner">
+      <div class="hero-photo-face front"><img src="icons-artlist/foote2-A.png" alt=""></div>
+      <div class="hero-photo-face back"><img src="icons-artlist/foote2-B.png" alt=""></div>
+    </div>
+  </div>
+  <div class="hero-photo footer-photo-3" id="footerPhoto3">
+    <div class="hero-photo-inner">
+      <div class="hero-photo-face front"><img src="icons-artlist/footer3-A.png" alt=""></div>
+      <div class="hero-photo-face back"><img src="icons-artlist/footer3-B.png" alt=""></div>
+    </div>
+  </div>
+  <div class="hero-photo footer-photo-4" id="footerPhoto4">
+    <div class="hero-photo-inner">
+      <div class="hero-photo-face front"><img src="icons-artlist/footer4-A.png" alt=""></div>
+      <div class="hero-photo-face back"><img src="icons-artlist/footer4-B.png" alt=""></div>
+    </div>
+  </div>
+  <div>
+    <h2 class="fold-title">Thank you!</h2>
+    <p>A design case study for Artlist's AI new feature – created by Lior Wenger</p>
+  </div>
+</section>
+
+<div class="lightbox" id="lightbox" onclick="if(event.target===this) closeModal()">
+  <div class="lightbox-frame">
+    <button class="lightbox-close" onclick="closeModal()">✕</button>
+    <iframe id="lbFrame" src="" title="Full-size view" onload="try{this.contentWindow.scrollTo(0,0);}catch(e){}"></iframe>
+  </div>
+</div>
+
+<script>
+function openModal(src){
+  document.getElementById('lbFrame').src = src;
+  const lb = document.getElementById('lightbox');
+  lb.classList.add('open');
+  lb.scrollTop = 0;
+}
+function closeModal(){
+  document.getElementById('lightbox').classList.remove('open');
+  document.getElementById('lbFrame').src = '';
+}
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeModal(); });
+
+// hero word cycling
+const marketWords = ['Indian','Japanese','Brazilian','Korean','German'];
+const cycleWordEl = document.getElementById('cycleWord');
+let marketIdx = 0;
+function updateMarket(){
+  cycleWordEl.style.opacity = 0;
+  setTimeout(()=>{
+    cycleWordEl.textContent = marketWords[marketIdx];
+    cycleWordEl.style.opacity = 1;
+  }, 220);
+}
+setInterval(()=>{ marketIdx = (marketIdx+1) % marketWords.length; updateMarket(); }, 2600);
+
+const heroPhoto1 = document.getElementById('heroPhoto1');
+const heroPhoto2 = document.getElementById('heroPhoto2');
+if(heroPhoto1){ setInterval(()=>{ heroPhoto1.classList.toggle('flipped'); }, 2000); }
+if(heroPhoto2){ setTimeout(()=>{ setInterval(()=>{ heroPhoto2.classList.toggle('flipped'); }, 2000); }, 180); }
+
+['footerPhoto1','footerPhoto3','footerPhoto4','footerPhoto2'].forEach((id, i)=>{
+  const el = document.getElementById(id);
+  if(el){ setTimeout(()=>{ setInterval(()=>{ el.classList.toggle('flipped'); }, 2000); }, i * 150); }
+});
+
+// pinned card-stack reveal
+const pinSection = document.getElementById('pinSection');
+const cards = document.querySelectorAll('.stack-card');
+let ticking = false;
+function updateStack(){
+  const rect = pinSection.getBoundingClientRect();
+  const scrollable = pinSection.offsetHeight - window.innerHeight;
+  const rawProgress = Math.min(1, Math.max(0, -rect.top / scrollable));
+  const readDelay = 0.18;
+  const progress = Math.min(1, Math.max(0, (rawProgress - readDelay) / (1 - readDelay)));
+  const remaining = cards.length - 1;
+  const extra = Math.min(remaining, Math.floor(progress * remaining) + (progress > 0 ? 1 : 0));
+  const activeCount = 1 + extra;
+  cards.forEach((c,i)=> c.classList.toggle('active', i < activeCount));
+  ticking = false;
+}
+document.addEventListener('scroll', ()=>{
+  if(!ticking){ requestAnimationFrame(updateStack); ticking = true; }
+}, {passive:true});
+updateStack();
+
+</script>
+</body>
+</html>
